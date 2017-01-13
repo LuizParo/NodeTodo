@@ -6,14 +6,20 @@ module.exports = function(app) {
     app.use(bodyParser.urlencoded({extended : true}));
 
     app.get('/api/todos/:username', function(req, res) {
-        Todos.find({username : req.params.username}, function(err, results) {
+        Todos.find({username : req.params.username}, function(err, result) {
             if(err) {
                 console.log(err);
                 res.status(500).json(err);
                 return;
             }
 
-            res.send(results);
+            if(!result) {
+                console.log(`Resource '${req.params.username}' doesn't exist`);
+                res.sendStatus(404);
+                return;
+            }
+
+            res.send(result);
         });
     });
 
@@ -22,6 +28,12 @@ module.exports = function(app) {
             if(err) {
                 console.log(err);
                 res.status(500).json(err);
+                return;
+            }
+
+            if(!result) {
+                console.log(`Resource '${req.params.id}' doesn't exist`);
+                res.sendStatus(404);
                 return;
             }
 
@@ -37,7 +49,7 @@ module.exports = function(app) {
                 todo : todo.todo,
                 isDone : todo.isDone,
                 hasAttachment : todo.hasAttachment
-            }, function() {
+            }, function(err, result) {
                 if(err) {
                     console.log(err);
                     res.status(500).json(err);
